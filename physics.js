@@ -18,73 +18,53 @@ var Model = /** @class */ (function () {
     }
     return Model;
 }());
-var Catenary = /** @class */ (function (_super) {
-    __extends(Catenary, _super);
-    function Catenary(elements, span, elementLength) {
+var Pendulum = /** @class */ (function (_super) {
+    __extends(Pendulum, _super);
+    function Pendulum(length, angle) {
+        if (angle === void 0) { angle = 0; }
         var _this = _super.call(this) || this;
-        _this.span = span;
-        _this.elements = [];
-        if (elements % 2 == 1)
-            throw new Error('ni odd elements');
-        if (elements * elementLength < span)
-            throw new Error('too short to span');
-        var midpoint = span / 2;
-        var halfLength = elements * elementLength / 2;
-        var dxElement = span / elements;
-        var dyElement = Math.sqrt(halfLength * halfLength - midpoint * midpoint) / elements;
-        var x0 = 0;
-        var y0 = 0;
-        for (var i = 0; i < elements / 2; ++i) {
-            var x1 = x0 + dxElement;
-            var y1 = y0 + dyElement;
-            var e = new CatenaryElement(x0, y0, x1, y1);
-            _this.elements.push(e);
-            x0 = x1;
-            y0 = y1;
-        }
-        for (var i = elements / 2 - 1; i >= 0; --i) {
-            var c_1 = _this.elements[i];
-            var e = new CatenaryElement(span - c_1.x1, c_1.y1, span - c_1.x0, c_1.y0);
-            _this.elements.push(e);
-        }
-        console.log(_this.elements);
+        _this.length = length;
+        _this.angle_ = angle;
         return _this;
     }
-    return Catenary;
+    Pendulum.prototype.update = function () {
+        var pe0 = this.energy();
+        console.log('pe0', pe0);
+        // Compute PE change for changing angles of items.
+        // Item 0
+        /*
+        const da = Math.PI / 180;
+        const e = this.elements[0];
+        const a0 = Math.atan2(e.y1 - e.y0, e.x1 - e.x0);
+        const a1 = a0 + da;
+        const
+        */
+    };
+    Pendulum.prototype.energy = function () {
+        //return this.elements
+        //.map(e => -(e.y0 + e.y1) / 2)
+        //.reduce((a, b) => a + b);
+    };
+    return Pendulum;
 }(Model));
-var CatenaryElement = /** @class */ (function () {
-    function CatenaryElement(x0, y0, x1, y1) {
-        this.x0 = x0;
-        this.y0 = y0;
-        this.x1 = x1;
-        this.y1 = y1;
-    }
-    return CatenaryElement;
-}());
-var CatenaryView = /** @class */ (function () {
-    function CatenaryView(model) {
+var PendulumView = /** @class */ (function () {
+    function PendulumView(model) {
         this.model = model;
         var canvas = document.getElementById("myCanvas");
         canvas.width = this.w = window.innerWidth * 0.8;
         canvas.height = this.h = window.innerHeight * 0.8;
         this.ctx = canvas.getContext("2d");
-        this.ctx.translate((this.w - model.span) / 2, 100);
     }
-    CatenaryView.prototype.draw = function () {
-        var ctx = this.ctx;
-        ctx.fillStyle = '#eee';
-        ctx.fillRect(0, 0, this.w, this.h);
-        ctx.beginPath();
-        ctx.strokeStyle = '#222';
-        ctx.moveTo(this.model.elements[0].x0, this.model.elements[0].y0);
-        for (var _i = 0, _a = this.model.elements; _i < _a.length; _i++) {
-            var e = _a[_i];
-            ctx.lineTo(e.x1, e.y1);
-        }
-        ctx.stroke();
+    PendulumView.prototype.draw = function () {
+        this.ctx.fillStyle = '#e0e0e0';
+        this.ctx.fillRect(0, 0, this.w, this.h);
+        this.ctx.strokeStyle = '#303030';
+        this.ctx.moveTo(this.w / 2, 0);
+        this.ctx.lineTo(this.w / 2, this.model.length);
     };
-    return CatenaryView;
+    return PendulumView;
 }());
-var c = new Catenary(10, 500, 100);
-var v = new CatenaryView(c);
+var c = new Pendulum(100);
+var v = new PendulumView(c);
 v.draw();
+//c.update();
