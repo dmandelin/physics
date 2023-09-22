@@ -52,10 +52,17 @@ class PendulumView extends View{
         requestAnimationFrame(this.cb);
     }
 
-    draw() {
+    draw() {    
+        this.drawBackground()
+        this.drawPendulum();
+    }
+
+    drawBackground() {
         this.ctx.fillStyle = '#eee';
         this.ctx.fillRect(0, 0, this.w, this.h);
-        
+    }
+
+    drawPendulum() {
         const x = this.w / 2;
 
         this.ctx.strokeStyle = '#202020';
