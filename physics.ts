@@ -3,18 +3,22 @@ class Model {
 }
 
 class Pendulum extends Model {
-    θ_: number;
+    private θ_: number;
 
-    constructor(public readonly l: number, θ: number = 0, private ω: number = 0) {
+    constructor(
+        public readonly m: number, public readonly l: number, 
+        θ: number = 0, private ω_: number = 0,
+    ) {
         super();
         this.θ_ = θ;
     }
 
     get θ() { return this.θ_; }
+    get ω() { return this.ω_; }
 
-    update() {
-        this.θ_ += this.ω;
-        this.ω -= 0.001 * Math.sin(this.θ) / this.l*this.l;
+    update(dt: number = 1) {
+        this.θ_ += dt * this.ω_;
+        this.ω_ -= dt * 3 / 2 * Math.sin(this.θ_) / this.l;
     }
 }
 
@@ -41,15 +45,23 @@ class View {
 }
 
 class PendulumView extends View{
+    wmax = 0;
+
     constructor(private model: Pendulum) {
         super();
     }
     private cb = this.run.bind(this);
 
     run() {
-        this.model.update();
-        this.draw();
+        this.step();
         requestAnimationFrame(this.cb);
+    }
+
+    step() {
+        for (let i = 0; i < 100; ++i) {
+            this.model.update(0.001);
+        }
+        this.draw();
     }
 
     draw() {    
@@ -80,11 +92,21 @@ class PendulumView extends View{
     }
 
     drawReadout() {
+        const T = this.model.m * this.model.ω * this.model.ω * this.model.l * this.model.l / 6;
+        const V = (1-Math.cos(this.model.θ)) * this.model.m * this.model.l / 2;
+        const E = T + V;
+        this.wmax = Math.max(this.wmax, this.model.ω)
+
         this.ctx.font = "16px Segoe UI";
         this.ctx.fillStyle = "#202020";
         this.drawReadoutText(
             `θ = ${this.model.θ.toFixed(1)}`,
             `° = ${(180 * this.model.θ / Math.PI).toFixed(0)}`,
+            `ω = ${this.model.ω.toFixed(3)}`,
+            `ωmax = ${this.wmax.toFixed(3)}`,
+            `T = ${T.toFixed(3)}`,
+            `V = ${V.toFixed(3)}`,
+            `E = ${E.toFixed(3)}`,
         );
     }
 
@@ -99,6 +121,15 @@ class PendulumView extends View{
 
 }
 
-const c = new Pendulum(300, 40 * Math.PI / 180);
+//const c = new Pendulum(0.001, 300, 40 * Math.PI / 180);
+const c = new Pendulum(0.1, 300, Math.PI / 4);
 const v = new PendulumView(c);
+//v.draw();
 v.run();
+//v.draw();
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === ' ') {
+        v.step();
+    }
+});
