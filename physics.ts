@@ -30,6 +30,14 @@ class View {
 
         this.ctx = canvas.getContext("2d")!;
     }
+
+    drawCircle(x: number, y: number, r: number, fillStyle: string = '#111'): void {
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, r, 0, 2 * Math.PI);
+        this.ctx.fillStyle = fillStyle;
+        this.ctx.fill();
+        this.ctx.closePath();
+    }
 }
 
 class PendulumView extends View{
@@ -48,12 +56,17 @@ class PendulumView extends View{
         this.ctx.fillStyle = '#eee';
         this.ctx.fillRect(0, 0, this.w, this.h);
         
+        const x = this.w / 2;
+
+        this.ctx.strokeStyle = '#202020';
+        this.drawCircle(x, 0, 2)
+
         this.ctx.strokeStyle = '#303030';
         this.ctx.lineCap = 'round';
         this.ctx.beginPath();
-        this.ctx.moveTo(this.w / 2, 0);
+        this.ctx.moveTo(x, 0);
         this.ctx.lineTo(
-            this.w / 2 + this.model.l * Math.sin(this.model.θ),
+            x + this.model.l * Math.sin(this.model.θ),
             this.model.l * Math.cos(this.model.θ));
         this.ctx.stroke();
     }
