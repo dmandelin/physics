@@ -3,59 +3,62 @@ class Model {
 }
 
 class Pendulum extends Model {
-   angle_: number;
+    θ_: number;
 
-    constructor(public readonly length: number, angle: number = 0) {
+    constructor(public readonly l: number, θ: number = 0, private ω: number = 0) {
         super();
-        this.angle_ = angle;
+        this.θ_ = θ;
     }
+
+    get θ() { return this.θ_; }
 
     update() {
-        const pe0 = this.energy();
-        console.log('pe0', pe0);
-        // Compute PE change for changing angles of items.
-        // Item 0
-        /*
-        const da = Math.PI / 180;
-        const e = this.elements[0];
-        const a0 = Math.atan2(e.y1 - e.y0, e.x1 - e.x0);
-        const a1 = a0 + da;
-        const 
-        */
-    }
-
-    energy() {
-        //return this.elements
-        //.map(e => -(e.y0 + e.y1) / 2)
-        //.reduce((a, b) => a + b);
+        this.θ_ += this.ω;
+        this.ω -= 0.001 * Math.sin(this.θ) / this.l*this.l;
     }
 }
 
-class PendulumView {
-    private readonly ctx: CanvasRenderingContext2D;
-    private readonly w: number;
-    private readonly h: number;
+class View {
+    protected readonly ctx: CanvasRenderingContext2D;
+    protected readonly w: number;
+    protected readonly h: number;
 
-    constructor(private model: Pendulum) {
+    constructor() {
         const canvas = document.getElementById("myCanvas") as HTMLCanvasElement;    
         canvas.width = this.w = window.innerWidth * 0.8;
         canvas.height = this.h = window.innerHeight * 0.8;
 
         this.ctx = canvas.getContext("2d")!;
     }
+}
+
+class PendulumView extends View{
+    constructor(private model: Pendulum) {
+        super();
+    }
+    private cb = this.run.bind(this);
+
+    run() {
+        this.model.update();
+        this.draw();
+        requestAnimationFrame(this.cb);
+    }
 
     draw() {
-        this.ctx.fillStyle = '#e0e0e0';
+        this.ctx.fillStyle = '#eee';
         this.ctx.fillRect(0, 0, this.w, this.h);
         
         this.ctx.strokeStyle = '#303030';
+        this.ctx.lineCap = 'round';
+        this.ctx.beginPath();
         this.ctx.moveTo(this.w / 2, 0);
-        this.ctx.lineTo(this.w / 2, this.model.length);
+        this.ctx.lineTo(
+            this.w / 2 + this.model.l * Math.sin(this.model.θ),
+            this.model.l * Math.cos(this.model.θ));
+        this.ctx.stroke();
     }
 }
 
-const c = new Pendulum(100);
+const c = new Pendulum(300, 40 * Math.PI / 180);
 const v = new PendulumView(c);
-v.draw();
-
-//c.update();
+v.run();
