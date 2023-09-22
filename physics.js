@@ -49,6 +49,7 @@ class PendulumView extends View {
     draw() {
         this.drawBackground();
         this.drawPendulum();
+        this.drawReadout();
     }
     drawBackground() {
         this.ctx.fillStyle = '#eee';
@@ -64,6 +65,18 @@ class PendulumView extends View {
         this.ctx.moveTo(x, 0);
         this.ctx.lineTo(x + this.model.l * Math.sin(this.model.θ), this.model.l * Math.cos(this.model.θ));
         this.ctx.stroke();
+    }
+    drawReadout() {
+        this.ctx.font = "16px Segoe UI";
+        this.ctx.fillStyle = "#202020";
+        this.drawReadoutText(`θ = ${this.model.θ.toFixed(1)}`, `° = ${(180 * this.model.θ / Math.PI).toFixed(0)}`);
+    }
+    drawReadoutText(...ss) {
+        let y = 24;
+        for (const s of ss) {
+            this.ctx.fillText(s, 10, y);
+            y += 20;
+        }
     }
 }
 const c = new Pendulum(300, 40 * Math.PI / 180);
