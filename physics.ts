@@ -42,6 +42,39 @@ class View {
         this.ctx.fill();
         this.ctx.closePath();
     }
+
+    readonly vectorScale = 50;
+
+    drawVector(x0: number, y0: number, vx: number, vy: number, strokeStyle: string = 'green') {
+        const x1 = x0 + this.vectorScale * vx;
+        const y1 = y0 + this.vectorScale * vy;
+        this.ctx.strokeStyle = strokeStyle;
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(x0, y0);
+        this.ctx.lineTo(x1, y1);
+        
+        // Determine the angle
+        let angle = Math.atan2(y1 - y0, x1 - x0);
+    
+        // Length and width for the arrowhead
+        let length = 10;  // or any desired length
+        let width = 5;    // or any desired width
+    
+        // Calculate points for the arrowhead
+        let x2 = x1 - length * Math.cos(angle - Math.PI / 6); 
+        let y2 = y1 - length * Math.sin(angle - Math.PI / 6);
+        
+        let x3 = x1 - length * Math.cos(angle + Math.PI / 6);
+        let y3 = y1 - length * Math.sin(angle + Math.PI / 6);
+    
+        // Draw arrowhead
+        this.ctx.moveTo(x1, y1);
+        this.ctx.lineTo(x2, y2);
+        this.ctx.moveTo(x1, y1);
+        this.ctx.lineTo(x3, y3);
+        this.ctx.stroke();
+    }
 }
 
 class PendulumView extends View{
@@ -76,6 +109,7 @@ class PendulumView extends View{
     }
 
     drawPendulum() {
+        // The pendulum itself
         const x = this.w / 2;
 
         this.ctx.strokeStyle = '#202020';
@@ -89,6 +123,15 @@ class PendulumView extends View{
             x + this.model.l * Math.sin(this.model.θ),
             this.model.l * Math.cos(this.model.θ));
         this.ctx.stroke();
+
+        // Forces
+        const cx = x + 0.5 * this.model.l * Math.sin(this.model.θ);
+        const cy = 0.5 * this.model.l * Math.cos(this.model.θ);
+        const tf = Math.sin(this.model.θ);
+        const nf = Math.cos(this.model.θ);
+        this.drawVector(cx, cy, 0, 1, '#804040');
+        this.drawVector(cx, cy, -Math.cos(this.model.θ) * tf, Math.sin(this.model.θ) * tf);
+        this.drawVector(cx, cy, Math.sin(this.model.θ) * nf, Math.cos(this.model.θ) * nf, '#101010');
     }
 
     drawReadout() {
@@ -117,8 +160,6 @@ class PendulumView extends View{
             y += 20;
         }
     }
-
-
 }
 
 //const c = new Pendulum(0.001, 300, 40 * Math.PI / 180);
